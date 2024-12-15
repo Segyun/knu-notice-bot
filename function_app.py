@@ -51,12 +51,33 @@ def hourly_trigger(myTimer: func.TimerRequest) -> None:
 
     # Send notice to telegram chat room
     async def send_all_notices() -> None:
-        await knunoticebot.send_and_save_posts(ACADEMY, notice_numbers, azure_blob)
-        await knunoticebot.send_and_save_posts(AI, notice_numbers, azure_blob)
-        await knunoticebot.send_and_save_posts(COMPUTER, notice_numbers, azure_blob)
-        await knunoticebot.send_and_save_posts(NOTICE, notice_numbers, azure_blob)
-        await knunoticebot.send_and_save_posts(SEMINAR, notice_numbers, azure_blob)
-        await knunoticebot.send_and_save_posts(SWEDU, notice_numbers, azure_blob)
+        posts = []
+
+        posts.extend(
+            await knunoticebot.send_and_save_posts(ACADEMY, notice_numbers, azure_blob)
+        )
+        posts.extend(
+            await knunoticebot.send_and_save_posts(AI, notice_numbers, azure_blob)
+        )
+        posts.extend(
+            await knunoticebot.send_and_save_posts(COMPUTER, notice_numbers, azure_blob)
+        )
+        posts.extend(
+            await knunoticebot.send_and_save_posts(NOTICE, notice_numbers, azure_blob)
+        )
+        posts.extend(
+            await knunoticebot.send_and_save_posts(SEMINAR, notice_numbers, azure_blob)
+        )
+        posts.extend(
+            await knunoticebot.send_and_save_posts(SWEDU, notice_numbers, azure_blob)
+        )
+
+        try:
+            NOTICES_JSON = "notices.json"
+            notices_json = knunoticebot.convert_posts_to_json(posts)
+            azure_blob.upload_blob(NOTICES_JSON, notices_json)
+        except Exception as exception:
+            await knunoticebot.send_error_message("공지사항", exception)
 
     asyncio.run(send_all_notices())
 

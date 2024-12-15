@@ -53,6 +53,7 @@ class KNUNoticeBot:
 
                     posts.append(
                         {
+                            "type": self.NOTICE,
                             "number": number,
                             "title": title,
                             "writer": writer,
@@ -85,6 +86,7 @@ class KNUNoticeBot:
 
                     posts.append(
                         {
+                            "type": self.ACADEMY,
                             "number": number,
                             "title": title,
                             "writer": writer,
@@ -114,6 +116,7 @@ class KNUNoticeBot:
 
                     posts.append(
                         {
+                            "type": self.COMPUTER,
                             "number": number,
                             "title": title,
                             "writer": writer,
@@ -138,6 +141,7 @@ class KNUNoticeBot:
                     url = f'https://swedu.knu.ac.kr/05_sub/01_sub.html{row.find("a")["href"].strip()}'
                     posts.append(
                         {
+                            "type": self.SWEDU,
                             "number": number,
                             "title": title,
                             "writer": writer,
@@ -165,6 +169,7 @@ class KNUNoticeBot:
 
                     posts.append(
                         {
+                            "type": self.AI,
                             "number": number,
                             "title": title,
                             "writer": writer,
@@ -194,6 +199,7 @@ class KNUNoticeBot:
 
                     posts.append(
                         {
+                            "type": self.SEMINAR,
                             "number": number,
                             "title": title,
                             "writer": writer,
@@ -247,7 +253,7 @@ class KNUNoticeBot:
 
     async def send_and_save_posts(
         self, notice_type: str, notice_numbers: dict, azure_blob: AzureBlob
-    ) -> None:
+    ) -> list:
         notification_title = ""
         posts = []
 
@@ -277,10 +283,7 @@ class KNUNoticeBot:
         except Exception as exception:
             await self.send_error_message(notification_title, exception)
 
-        try:
-            posts_json = self.convert_posts_to_json(posts)
-            azure_blob.upload_blob(f"{notice_type}.json", posts_json)
-        except Exception as exception:
-            await self.send_error_message(notification_title, exception)
+        if posts:
+            notice_numbers[notice_type] = posts[-1]["number"]
 
-        notice_numbers[notice_type] = posts[-1]["number"]
+        return posts
